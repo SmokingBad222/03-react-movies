@@ -1,6 +1,6 @@
-import css from "./MovieGrid.module.css";
 import type { Movie } from "../../types/movie";
 import { buildImageUrl } from "../../services/movieService";
+import css from "./MovieGrid.module.css";
 
 interface MovieGridProps {
   movies: Movie[];
@@ -8,24 +8,29 @@ interface MovieGridProps {
 }
 
 export default function MovieGrid({ movies, onSelect }: MovieGridProps) {
-  if (!movies.length) return null;
+  if (!movies || movies.length === 0) return null;
 
   return (
     <ul className={css.grid}>
-      {movies.map((m) => (
-        <li key={m.id}>
-          <div className={css.card} onClick={() => onSelect(m)} role="button" tabIndex={0}
-               onKeyDown={(e) => (e.key === "Enter" ? onSelect(m) : null)}>
-            <img
-              className={css.image}
-              src={buildImageUrl(m.poster_path, "w500") || ""}
-              alt={m.title}
-              loading="lazy"
-            />
-            <h2 className={css.title}>{m.title}</h2>
-          </div>
-        </li>
-      ))}
+      {movies.map((movie) => {
+        const posterUrl = movie.poster_path
+          ? buildImageUrl(movie.poster_path)
+          : "/placeholder.jpg";
+
+        return (
+          <li key={movie.id}>
+            <div className={css.card} onClick={() => onSelect(movie)}>
+              <img
+                className={css.image}
+                src={posterUrl}
+                alt={movie.title}
+                loading="lazy"
+              />
+              <h2 className={css.title}>{movie.title}</h2>
+            </div>
+          </li>
+        );
+      })}
     </ul>
   );
 }

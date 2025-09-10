@@ -1,26 +1,22 @@
-import { useEffect } from "react";
+import { useEffect, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
-import css from "./MovieModal.module.css";
 import type { Movie } from "../../types/movie";
 import { buildImageUrl } from "../../services/movieService";
+import css from "./MovieModal.module.css";
 
 interface MovieModalProps {
-  movie: Movie | null;
+  movie: Movie;
   onClose: () => void;
 }
 
-const modalRoot = document.body; 
+const modalRoot = document.body;
 
 export default function MovieModal({ movie, onClose }: MovieModalProps) {
   useEffect(() => {
-    if (!movie) return;
-
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
-
     document.addEventListener("keydown", onKeyDown);
-    
     const { overflow } = document.body.style;
     document.body.style.overflow = "hidden";
 
@@ -28,13 +24,15 @@ export default function MovieModal({ movie, onClose }: MovieModalProps) {
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = overflow;
     };
-  }, [movie, onClose]);
+  }, [onClose]);
 
-  if (!movie) return null;
-
-  const handleBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleBackdrop = (e: MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) onClose();
   };
+
+  const backdropUrl = movie.backdrop_path
+    ? buildImageUrl(movie.backdrop_path, "original")
+    : "/placeholder.jpg";
 
   return createPortal(
     <div className={css.backdrop} role="dialog" aria-modal="true" onClick={handleBackdrop}>
@@ -42,13 +40,7 @@ export default function MovieModal({ movie, onClose }: MovieModalProps) {
         <button className={css.closeButton} aria-label="Close modal" onClick={onClose}>
           &times;
         </button>
-
-        <img
-          src={buildImageUrl(movie.backdrop_path, "original")}
-          alt={movie.title}
-          className={css.image}
-        />
-
+        <img src={backdropUrl} alt={movie.title} className={css.image} />
         <div className={css.content}>
           <h2>{movie.title}</h2>
           <p>{movie.overview}</p>

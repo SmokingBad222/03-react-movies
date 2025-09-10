@@ -1,47 +1,47 @@
-import { toast } from "react-hot-toast";
-import styles from "./SearchBar.module.css";
+import { useState, type FormEvent } from "react";
+import toast from "react-hot-toast";
+import css from "./SearchBar.module.css";
 
 interface SearchBarProps {
-  onSubmit: (formData: FormData) => void | Promise<void>;
+  onSubmit: (query: string) => void;
 }
 
 export default function SearchBar({ onSubmit }: SearchBarProps) {
+  const [query, setQuery] = useState("");
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    const query = String(fd.get("query") ?? "").trim();
-    if (!query) {
+    if (!query.trim()) {
       toast.error("Please enter your search query.");
       return;
     }
-    onSubmit(fd);
-    e.currentTarget.reset();
+    onSubmit(query.trim());
+    setQuery("");
   };
 
   return (
-    <header className={styles.header}>
-      <div className={styles.container}>
+    <header className={css.header}>
+      <div className={css.container}>
         <a
-          className={styles.link}
+          className={css.link}
           href="https://www.themoviedb.org/"
           target="_blank"
           rel="noopener noreferrer"
         >
           Powered by TMDB
         </a>
-
-   
-        <form className={styles.form} onSubmit={handleSubmit} action={onSubmit as any}>
+        <form className={css.form} onSubmit={handleSubmit}>
           <input
-            className={styles.input}
+            className={css.input}
             type="text"
             name="query"
             autoComplete="off"
             placeholder="Search movies..."
             autoFocus
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
           />
-          <button className={styles.button} type="submit">
+          <button className={css.button} type="submit">
             Search
           </button>
         </form>
@@ -49,3 +49,4 @@ export default function SearchBar({ onSubmit }: SearchBarProps) {
     </header>
   );
 }
+

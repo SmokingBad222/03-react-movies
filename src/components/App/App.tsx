@@ -1,37 +1,26 @@
 import { useState } from "react";
-import { Toaster, toast } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import SearchBar from "../SearchBar/SearchBar";
 import MovieGrid from "../MovieGrid/MovieGrid";
 import Loader from "../Loader/Loader";
-import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import MovieModal from "../MovieModal/MovieModal";
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import { fetchMovies } from "../../services/movieService";
 import type { Movie } from "../../types/movie";
-import styles from "./App.module.css";
 
 export default function App() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
-  const [selected, setSelected] = useState<Movie | null>(null);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
-  
-  const handleSearch = async (formData: FormData) => {
-    const query = String(formData.get("query") ?? "").trim();
-    if (!query) {
-    
-      toast.error("Please enter your search query.");
-      return;
-    }
-
-    
-    setMovies([]);
-    setError(false);
+  const handleSearch = async (query: string) => {
     setLoading(true);
-
+    setError(false);
+    setMovies([]);
     try {
-      const data = await fetchMovies(query, 1);
-      if (!data.length) {
+      const data = await fetchMovies(query);
+      if (data.length === 0) {
         toast.error("No movies found for your request.");
       }
       setMovies(data);
@@ -43,25 +32,26 @@ export default function App() {
     }
   };
 
-  const openModal = (movie: Movie) => setSelected(movie);
-  const closeModal = () => setSelected(null);
+  const handleSelectMovie = (movie: Movie) => {
+    setSelectedMovie(movie);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedMovie(null);
+  };
 
   return (
     <>
-      <SearchBar onSubmit={handleSearch} />
-
-      <main className={styles.main}>
-        {loading ? (
-          <Loader />
-        ) : error ? (
-          <ErrorMessage />
-        ) : (
-          <MovieGrid movies={movies} onSelect={openModal} />
-        )}
-      </main>
-
-      <MovieModal movie={selected} onClose={closeModal} />
       <Toaster position="top-right" />
+      <SearchBar onSubmit={handleSearch} />
+      {loading && <Loader />}
+      {error && <ErrorMessage />}
+      {movies.length > 0 && (
+        <MovieGrid movies={movies} onSelect={handleSelectMovie} />
+      )}
+      {selectedMovie && (
+        <MovieModal movie={selectedMovie} onClose={handleCloseModal} />
+      )}
     </>
   );
 }
