@@ -1,11 +1,11 @@
-import axios, { AxiosInstance, AxiosResponse } from "axios";
+import axios from "axios";
+import type { AxiosInstance, AxiosResponse } from "axios";
 import type { Movie } from "../types/movie";
 
 const TMDB_TOKEN = import.meta.env.VITE_TMDB_TOKEN as string;
 
 if (!TMDB_TOKEN) {
-  // Допоможе зловити помилку конфігурації ще на старті
-  // eslint-disable-next-line no-console
+  
   console.error("VITE_TMDB_TOKEN is missing in .env");
 }
 
